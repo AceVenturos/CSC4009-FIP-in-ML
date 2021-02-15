@@ -1,0 +1,8 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Datasource local storage ignored files
+/../../../../../../../../../../../../:\Users\jmcke\Documents\Me\University\MEng\CSC4009 - Fairness, Privacy and Interpretability in Machine Learning\Assignment\Code\CSC4009-FIP-in-ML\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
