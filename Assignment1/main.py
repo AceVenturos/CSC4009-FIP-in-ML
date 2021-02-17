@@ -1,8 +1,9 @@
-from numpy import mean, std, arange
+from numpy import mean, std, arange, asarray, sum
 import pandas as pd
 from sklearn import model_selection as skms
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import RepeatedStratifiedKFold, GridSearchCV
+from sklego.metrics import p_percent_score
 from scipy.stats import ks_2samp
 import seaborn as sb
 from collections import Counter
@@ -244,6 +245,10 @@ pred = model.predict(X)
 print("Overall Test Accuracy %.3f" % accuracy_score(y, pred))
 test_df_wo_pa['prediction'] = pred
 
+
+#######
+# Sex #
+#######
 test_df_wo_pa['sex'] = test_df['sex']
 grouped_by_sex = test_df_wo_pa.groupby("sex")
 males = grouped_by_sex.get_group(" Male")
@@ -255,7 +260,19 @@ y = males[["classification"]].values.ravel()
 pred = model.predict(X)
 print(" Male Test Accuracy %.3f" % accuracy_score(y, pred))
 print(classification_report(males['classification'], males['prediction']))
-print(confusion_matrix(males['classification'], males['prediction']))
+
+# https://www.kite.com/python/answers/how-to-display-a-seaborn-plot-in-python
+cnf_mat_male = confusion_matrix(males['classification'], males['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_male.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_male.flatten()/sum(cnf_mat_male)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+pyplot.figure()
+sb.heatmap(cnf_mat_male, annot=labels, fmt='', cmap='Blues')
 
 
 print(females)
@@ -264,8 +281,45 @@ y = females[["classification"]].values.ravel()
 pred = model.predict(X)
 print(" Female Test Accuracy %.3f" % accuracy_score(y, pred))
 print(classification_report(females['classification'], females['prediction']))
-print(confusion_matrix(females['classification'], females['prediction']))
+cnf_mat_female = confusion_matrix(females['classification'], females['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_female.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_female.flatten()/sum(cnf_mat_female)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+pyplot.figure()
+sb.heatmap(cnf_mat_female, annot=labels, fmt='', cmap='Blues')
+# pyplot.show()
 
+
+# Demographic parity/Equality of oppotunity - https://scikit-lego.readthedocs.io/en/latest/fairness.html couldn't get
+# functions working as model won't take extra variable, followed mathematical formulae to implement my own versions
+def p_percent_score(cnf_mat_a, cnf_mat_b):
+    pos_a = (cnf_mat_a.flatten()[1] + cnf_mat_a.flatten()[3]) / sum(cnf_mat_a)
+    pos_b = (cnf_mat_b.flatten()[1] + cnf_mat_b.flatten()[3]) / sum(cnf_mat_b)
+
+    p_score = min(pos_a/pos_b, pos_b/pos_a)
+    return p_score
+
+
+def equality_of_opportunity(cnf_mat_a, cnf_mat_b):
+    tp_a = cnf_mat_a.flatten()[1] / sum(cnf_mat_a)
+    tp_b = cnf_mat_b.flatten()[3] / sum(cnf_mat_b)
+
+    eq_op = min(tp_a/tp_b, tp_b/tp_a)
+    return eq_op
+
+
+print("P Percent Disparity: %.4f" % p_percent_score(cnf_mat_male, cnf_mat_female))
+print("Equality of Opportunity Disparity: %.4f" % equality_of_opportunity(cnf_mat_male, cnf_mat_female))
+
+exit(0)
+########
+# Race #
+########
 test_df_wo_pa['race'] = test_df['race']
 test_df_wo_pa = test_df_wo_pa.drop("sex", axis=1)
 grouped_by_race = test_df_wo_pa.groupby("race")
