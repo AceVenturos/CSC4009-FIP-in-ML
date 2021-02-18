@@ -10,6 +10,9 @@ from matplotlib import pyplot
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import pickle
 
+from aif360.metrics import BinaryLabelDatasetMetric
+from aif360.datasets import BinaryLabelDataset
+
 # Code based from this article
 # https://machinelearningmastery.com/imbalanced-classification-with-the-adult-income-dataset/
 # https://machinelearningmastery.com/gradient-boosting-machine-ensemble-in-python/
@@ -177,8 +180,8 @@ print(test_df_wo_pa.head())
 #     return models
 
 
-# X = train_df_wo_pa.drop("classification", axis=1)
-# y = train_df_wo_pa[["classification"]].values.ravel()
+X = train_df_wo_pa.drop("classification", axis=1)
+y = train_df_wo_pa[["classification"]].values.ravel()
 
 # # get the models to evaluate
 # models = get_models()
@@ -223,19 +226,19 @@ print(test_df_wo_pa.head())
 
 # Best: 0.844672 using {'learning_rate': 0.01, 'max_depth': 7, 'n_estimators': 500, 'subsample': 0.7}
 
-
-# model = GradientBoostingClassifier(learning_rate=0.01, max_depth=7, n_estimators=500, subsample=0.7)
-# model.fit(X, y)
+# Updated when experimenting with hyperparameters
+model = GradientBoostingClassifier(learning_rate=0.01, max_depth=3, n_estimators=500, subsample=0.7)
+model.fit(X, y)
 #
 # https://machinelearningmastery.com/save-load-machine-learning-models-python-scikit-learn/
-model_filename = 'gdm.csv'
+# model_filename = 'gdm.csv'
 # pickle.dump(model, open(model_filename, 'wb'))
 #
 
 X = test_df_wo_pa.drop("classification", axis=1)
 y = test_df_wo_pa[["classification"]].values.ravel()
 
-model = pickle.load(open(model_filename, 'rb'))
+# model = pickle.load(open(model_filename, 'rb'))
 
 ###########
 # Testing #
@@ -249,72 +252,84 @@ test_df_wo_pa['prediction'] = pred
 # Sex #
 #######
 test_df_wo_pa['sex'] = test_df['sex']
-# grouped_by_sex = test_df_wo_pa.groupby("sex")
-# males = grouped_by_sex.get_group(" Male")
-# females = grouped_by_sex.get_group(" Female")
-#
+grouped_by_sex = test_df_wo_pa.groupby("sex")
+males = grouped_by_sex.get_group(" Male")
+females = grouped_by_sex.get_group(" Female")
+
 # print(males)
-# X = males.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
-# y = males[["classification"]].values.ravel()
-# pred = model.predict(X)
-# print(" Male Test Accuracy %.4f" % accuracy_score(y, pred))
+X = males.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
+y = males[["classification"]].values.ravel()
+pred = model.predict(X)
+print(" Male Test Accuracy %.4f" % accuracy_score(y, pred))
 # print(classification_report(males['classification'], males['prediction']))
-#
+
 # # https://www.kite.com/python/answers/how-to-display-a-seaborn-plot-in-python
-# cnf_mat_male = confusion_matrix(males['classification'], males['prediction'])
-# group_names = ['True Neg','False Pos','False Neg','True Pos']
-# group_counts = ["{0:0.0f}".format(value) for value in
-#                 cnf_mat_male.flatten()]
-# group_percentages = ["{0:.2%}".format(value) for value in
-#                      cnf_mat_male.flatten()/sum(cnf_mat_male)]
-# labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
-#           zip(group_names,group_counts,group_percentages)]
-# labels = asarray(labels).reshape(2,2)
-# pyplot.figure()
-# sb.heatmap(cnf_mat_male, annot=labels, fmt='', cmap='Blues')
-#
-#
+cnf_mat_male = confusion_matrix(males['classification'], males['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_male.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_male.flatten()/sum(cnf_mat_male)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+pyplot.figure()
+sb.heatmap(cnf_mat_male, annot=labels, fmt='', cmap='Blues')
+
+
 # print(females)
-# X = females.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
-# y = females[["classification"]].values.ravel()
-# pred = model.predict(X)
-# print(" Female Test Accuracy %.4f" % accuracy_score(y, pred))
+X = females.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
+y = females[["classification"]].values.ravel()
+pred = model.predict(X)
+print(" Female Test Accuracy %.4f" % accuracy_score(y, pred))
 # print(classification_report(females['classification'], females['prediction']))
-# cnf_mat_female = confusion_matrix(females['classification'], females['prediction'])
-# group_names = ['True Neg','False Pos','False Neg','True Pos']
-# group_counts = ["{0:0.0f}".format(value) for value in
-#                 cnf_mat_female.flatten()]
-# group_percentages = ["{0:.2%}".format(value) for value in
-#                      cnf_mat_female.flatten()/sum(cnf_mat_female)]
-# labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
-#           zip(group_names,group_counts,group_percentages)]
-# labels = asarray(labels).reshape(2,2)
-# pyplot.figure()
-# sb.heatmap(cnf_mat_female, annot=labels, fmt='', cmap='Blues')
-# pyplot.show()
+cnf_mat_female = confusion_matrix(females['classification'], females['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_female.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_female.flatten()/sum(cnf_mat_female)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+print(cnf_mat_female)
+pyplot.figure()
+sb.heatmap(cnf_mat_female, annot=labels, fmt='', cmap='Blues')
 
 
 # Demographic parity/Equality of oppotunity - https://scikit-lego.readthedocs.io/en/latest/fairness.html couldn't get
 # functions working as model won't take extra variable, followed mathematical formulae to implement my own versions
-def p_percent_score(cnf_mat_a, cnf_mat_b):
+# Updated to match aif360s disparate impact function matrix a is privileged
+# https://aif360.readthedocs.io/en/latest/modules/generated/aif360.metrics.ClassificationMetric.html
+def disparate_impact(cnf_mat_a, cnf_mat_b):
     pos_a = (cnf_mat_a.flatten()[1] + cnf_mat_a.flatten()[3]) / sum(cnf_mat_a)
     pos_b = (cnf_mat_b.flatten()[1] + cnf_mat_b.flatten()[3]) / sum(cnf_mat_b)
 
-    p_score = min(pos_a/pos_b, pos_b/pos_a)
-    return p_score
+    di = pos_b/pos_a
+    return di
 
 
 def equality_of_opportunity(cnf_mat_a, cnf_mat_b):
-    tp_a = cnf_mat_a.flatten()[1] / sum(cnf_mat_a)
+    tp_a = cnf_mat_a.flatten()[3] / sum(cnf_mat_a)
     tp_b = cnf_mat_b.flatten()[3] / sum(cnf_mat_b)
 
-    eq_op = min(tp_a/tp_b, tp_b/tp_a)
-    return eq_op
+    eq_op_difference = tp_b - tp_a
+    return eq_op_difference
 
 
-# print("P Percent Disparity: %.4f" % p_percent_score(cnf_mat_male, cnf_mat_female))
-# print("Equality of Opportunity Disparity: %.4f" % equality_of_opportunity(cnf_mat_male, cnf_mat_female))
+def average_odds_difference(cnf_mat_a, cnf_mat_b):
+    tp_a = cnf_mat_a.flatten()[3] / sum(cnf_mat_a)
+    tp_b = cnf_mat_b.flatten()[3] / sum(cnf_mat_b)
 
+    fp_a = cnf_mat_a.flatten()[1] / sum(cnf_mat_a)
+    fp_b = cnf_mat_b.flatten()[1] / sum(cnf_mat_b)
+    return 0.5 * ((fp_b - fp_a) + (tp_b - tp_a))
+
+
+
+print("Disparate Impact: %.4f" % disparate_impact(cnf_mat_male, cnf_mat_female))
+print("Equality of Opportunity Disparity: %.4f" % equality_of_opportunity(cnf_mat_male, cnf_mat_female))
+print("Average Odds Difference: %.4f" % average_odds_difference(cnf_mat_male, cnf_mat_female))
 
 ########
 # Race #
@@ -329,12 +344,12 @@ other = grouped_by_race.get_group(" Other")
 white = grouped_by_race.get_group(" White")
 
 
-print(amer_indian_eskimo)
+# print(amer_indian_eskimo)
 X = amer_indian_eskimo.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
 y = amer_indian_eskimo[["classification"]].values.ravel()
 pred = model.predict(X)
 print(" Amer-Indian-Eskimo Test Accuracy %.4f" % accuracy_score(y, pred))
-print(classification_report(amer_indian_eskimo['classification'], amer_indian_eskimo['prediction']))
+# print(classification_report(amer_indian_eskimo['classification'], amer_indian_eskimo['prediction']))
 cnf_mat_aie = confusion_matrix(amer_indian_eskimo['classification'], amer_indian_eskimo['prediction'])
 group_names = ['True Neg','False Pos','False Neg','True Pos']
 group_counts = ["{0:0.0f}".format(value) for value in
@@ -348,12 +363,12 @@ pyplot.figure()
 sb.heatmap(cnf_mat_aie, annot=labels, fmt='', cmap='Blues')
 
 
-print(asian_pac_islander)
+# print(asian_pac_islander)
 X = asian_pac_islander.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
 y = asian_pac_islander[["classification"]].values.ravel()
 pred = model.predict(X)
 print(" Asian-Pac-Islander Test Accuracy %.4f" % accuracy_score(y, pred))
-print(classification_report(asian_pac_islander['classification'], asian_pac_islander['prediction']))
+# print(classification_report(asian_pac_islander['classification'], asian_pac_islander['prediction']))
 cnf_mat_api = confusion_matrix(asian_pac_islander['classification'], asian_pac_islander['prediction'])
 group_names = ['True Neg','False Pos','False Neg','True Pos']
 group_counts = ["{0:0.0f}".format(value) for value in
@@ -367,12 +382,12 @@ pyplot.figure()
 sb.heatmap(cnf_mat_api, annot=labels, fmt='', cmap='Blues')
 
 
-print(black)
+# print(black)
 X = black.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
 y = black[["classification"]].values.ravel()
 pred = model.predict(X)
 print(" Black Test Accuracy %.4f" % accuracy_score(y, pred))
-print(classification_report(black['classification'], black['prediction']))
+# print(classification_report(black['classification'], black['prediction']))
 cnf_mat_black = confusion_matrix(black['classification'], black['prediction'])
 group_names = ['True Neg','False Pos','False Neg','True Pos']
 group_counts = ["{0:0.0f}".format(value) for value in
@@ -386,12 +401,12 @@ pyplot.figure()
 sb.heatmap(cnf_mat_black, annot=labels, fmt='', cmap='Blues')
 
 
-print(other)
+# print(other)
 X = other.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
 y = other[["classification"]].values.ravel()
 pred = model.predict(X)
 print(" Other (Race) Test Accuracy %.4f" % accuracy_score(y, pred))
-print(classification_report(other['classification'], other['prediction']))
+# print(classification_report(other['classification'], other['prediction']))
 cnf_mat_other = confusion_matrix(other['classification'], other['prediction'])
 group_names = ['True Neg','False Pos','False Neg','True Pos']
 group_counts = ["{0:0.0f}".format(value) for value in
@@ -404,12 +419,12 @@ labels = asarray(labels).reshape(2,2)
 pyplot.figure()
 sb.heatmap(cnf_mat_other, annot=labels, fmt='', cmap='Blues')
 
-print(white)
+# print(white)
 X = white.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
 y = white[["classification"]].values.ravel()
 pred = model.predict(X)
 print(" White Test Accuracy %.4f" % accuracy_score(y, pred))
-print(classification_report(white['classification'], white['prediction']))
+# print(classification_report(white['classification'], white['prediction']))
 cnf_mat_white = confusion_matrix(white['classification'], white['prediction'])
 group_names = ['True Neg','False Pos','False Neg','True Pos']
 group_counts = ["{0:0.0f}".format(value) for value in
@@ -421,18 +436,22 @@ labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
 labels = asarray(labels).reshape(2,2)
 pyplot.figure()
 sb.heatmap(cnf_mat_white, annot=labels, fmt='', cmap='Blues')
-pyplot.show()
+# pyplot.show()
 
-print("P Percent Disparity AIE: %.4f" % p_percent_score(cnf_mat_white, cnf_mat_aie))
+print("Disparity AIE: %.4f" % disparate_impact(cnf_mat_white, cnf_mat_aie))
 print("Equality of Opportunity Disparity AIE: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_aie))
+print("Average Odds Difference: %.4f" % average_odds_difference(cnf_mat_white, cnf_mat_aie))
 
-print("P Percent Disparity API: %.4f" % p_percent_score(cnf_mat_white, cnf_mat_api))
+print("Disparity API: %.4f" % disparate_impact(cnf_mat_white, cnf_mat_api))
 print("Equality of Opportunity Disparity API: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_api))
+print("Average Odds Difference: %.4f" % average_odds_difference(cnf_mat_white, cnf_mat_api))
 
-print("P Percent Disparity Other: %.4f" % p_percent_score(cnf_mat_white, cnf_mat_other))
+print("Disparity Other: %.4f" % disparate_impact(cnf_mat_white, cnf_mat_other))
 print("Equality of Opportunity Disparity Other: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_other))
+print("Average Odds Difference: %.4f" % average_odds_difference(cnf_mat_white, cnf_mat_other))
 
-print("P Percent Disparity Black: %.4f" % p_percent_score(cnf_mat_white, cnf_mat_black))
+print("Disparity Black: %.4f" % disparate_impact(cnf_mat_white, cnf_mat_black))
 print("Equality of Opportunity Disparity Black: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_black))
+print("Average Odds Difference: %.4f" % average_odds_difference(cnf_mat_white, cnf_mat_black))
 
 
