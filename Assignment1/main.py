@@ -3,7 +3,6 @@ import pandas as pd
 from sklearn import model_selection as skms
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import RepeatedStratifiedKFold, GridSearchCV
-from sklego.metrics import p_percent_score
 from scipy.stats import ks_2samp
 import seaborn as sb
 from collections import Counter
@@ -250,48 +249,48 @@ test_df_wo_pa['prediction'] = pred
 # Sex #
 #######
 test_df_wo_pa['sex'] = test_df['sex']
-grouped_by_sex = test_df_wo_pa.groupby("sex")
-males = grouped_by_sex.get_group(" Male")
-females = grouped_by_sex.get_group(" Female")
-
-print(males)
-X = males.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
-y = males[["classification"]].values.ravel()
-pred = model.predict(X)
-print(" Male Test Accuracy %.3f" % accuracy_score(y, pred))
-print(classification_report(males['classification'], males['prediction']))
-
-# https://www.kite.com/python/answers/how-to-display-a-seaborn-plot-in-python
-cnf_mat_male = confusion_matrix(males['classification'], males['prediction'])
-group_names = ['True Neg','False Pos','False Neg','True Pos']
-group_counts = ["{0:0.0f}".format(value) for value in
-                cnf_mat_male.flatten()]
-group_percentages = ["{0:.2%}".format(value) for value in
-                     cnf_mat_male.flatten()/sum(cnf_mat_male)]
-labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
-          zip(group_names,group_counts,group_percentages)]
-labels = asarray(labels).reshape(2,2)
-pyplot.figure()
-sb.heatmap(cnf_mat_male, annot=labels, fmt='', cmap='Blues')
-
-
-print(females)
-X = females.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
-y = females[["classification"]].values.ravel()
-pred = model.predict(X)
-print(" Female Test Accuracy %.3f" % accuracy_score(y, pred))
-print(classification_report(females['classification'], females['prediction']))
-cnf_mat_female = confusion_matrix(females['classification'], females['prediction'])
-group_names = ['True Neg','False Pos','False Neg','True Pos']
-group_counts = ["{0:0.0f}".format(value) for value in
-                cnf_mat_female.flatten()]
-group_percentages = ["{0:.2%}".format(value) for value in
-                     cnf_mat_female.flatten()/sum(cnf_mat_female)]
-labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
-          zip(group_names,group_counts,group_percentages)]
-labels = asarray(labels).reshape(2,2)
-pyplot.figure()
-sb.heatmap(cnf_mat_female, annot=labels, fmt='', cmap='Blues')
+# grouped_by_sex = test_df_wo_pa.groupby("sex")
+# males = grouped_by_sex.get_group(" Male")
+# females = grouped_by_sex.get_group(" Female")
+#
+# print(males)
+# X = males.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
+# y = males[["classification"]].values.ravel()
+# pred = model.predict(X)
+# print(" Male Test Accuracy %.4f" % accuracy_score(y, pred))
+# print(classification_report(males['classification'], males['prediction']))
+#
+# # https://www.kite.com/python/answers/how-to-display-a-seaborn-plot-in-python
+# cnf_mat_male = confusion_matrix(males['classification'], males['prediction'])
+# group_names = ['True Neg','False Pos','False Neg','True Pos']
+# group_counts = ["{0:0.0f}".format(value) for value in
+#                 cnf_mat_male.flatten()]
+# group_percentages = ["{0:.2%}".format(value) for value in
+#                      cnf_mat_male.flatten()/sum(cnf_mat_male)]
+# labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+#           zip(group_names,group_counts,group_percentages)]
+# labels = asarray(labels).reshape(2,2)
+# pyplot.figure()
+# sb.heatmap(cnf_mat_male, annot=labels, fmt='', cmap='Blues')
+#
+#
+# print(females)
+# X = females.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
+# y = females[["classification"]].values.ravel()
+# pred = model.predict(X)
+# print(" Female Test Accuracy %.4f" % accuracy_score(y, pred))
+# print(classification_report(females['classification'], females['prediction']))
+# cnf_mat_female = confusion_matrix(females['classification'], females['prediction'])
+# group_names = ['True Neg','False Pos','False Neg','True Pos']
+# group_counts = ["{0:0.0f}".format(value) for value in
+#                 cnf_mat_female.flatten()]
+# group_percentages = ["{0:.2%}".format(value) for value in
+#                      cnf_mat_female.flatten()/sum(cnf_mat_female)]
+# labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+#           zip(group_names,group_counts,group_percentages)]
+# labels = asarray(labels).reshape(2,2)
+# pyplot.figure()
+# sb.heatmap(cnf_mat_female, annot=labels, fmt='', cmap='Blues')
 # pyplot.show()
 
 
@@ -313,10 +312,10 @@ def equality_of_opportunity(cnf_mat_a, cnf_mat_b):
     return eq_op
 
 
-print("P Percent Disparity: %.4f" % p_percent_score(cnf_mat_male, cnf_mat_female))
-print("Equality of Opportunity Disparity: %.4f" % equality_of_opportunity(cnf_mat_male, cnf_mat_female))
+# print("P Percent Disparity: %.4f" % p_percent_score(cnf_mat_male, cnf_mat_female))
+# print("Equality of Opportunity Disparity: %.4f" % equality_of_opportunity(cnf_mat_male, cnf_mat_female))
 
-exit(0)
+
 ########
 # Race #
 ########
@@ -329,42 +328,111 @@ black = grouped_by_race.get_group(" Black")
 other = grouped_by_race.get_group(" Other")
 white = grouped_by_race.get_group(" White")
 
+
 print(amer_indian_eskimo)
 X = amer_indian_eskimo.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
 y = amer_indian_eskimo[["classification"]].values.ravel()
 pred = model.predict(X)
-print(" Amer-Indian-Eskimo Test Accuracy %.3f" % accuracy_score(y, pred))
+print(" Amer-Indian-Eskimo Test Accuracy %.4f" % accuracy_score(y, pred))
 print(classification_report(amer_indian_eskimo['classification'], amer_indian_eskimo['prediction']))
-print(confusion_matrix(amer_indian_eskimo['classification'], amer_indian_eskimo['prediction']))
+cnf_mat_aie = confusion_matrix(amer_indian_eskimo['classification'], amer_indian_eskimo['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_aie.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_aie.flatten()/sum(cnf_mat_aie)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+pyplot.figure()
+sb.heatmap(cnf_mat_aie, annot=labels, fmt='', cmap='Blues')
+
 
 print(asian_pac_islander)
 X = asian_pac_islander.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
 y = asian_pac_islander[["classification"]].values.ravel()
 pred = model.predict(X)
-print(" Asian-Pac-Islander Test Accuracy %.3f" % accuracy_score(y, pred))
+print(" Asian-Pac-Islander Test Accuracy %.4f" % accuracy_score(y, pred))
 print(classification_report(asian_pac_islander['classification'], asian_pac_islander['prediction']))
-print(confusion_matrix(asian_pac_islander['classification'], asian_pac_islander['prediction']))
+cnf_mat_api = confusion_matrix(asian_pac_islander['classification'], asian_pac_islander['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_api.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_api.flatten()/sum(cnf_mat_api)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+pyplot.figure()
+sb.heatmap(cnf_mat_api, annot=labels, fmt='', cmap='Blues')
+
 
 print(black)
 X = black.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
 y = black[["classification"]].values.ravel()
 pred = model.predict(X)
-print(" Black Test Accuracy %.3f" % accuracy_score(y, pred))
+print(" Black Test Accuracy %.4f" % accuracy_score(y, pred))
 print(classification_report(black['classification'], black['prediction']))
-print(confusion_matrix(black['classification'], black['prediction']))
+cnf_mat_black = confusion_matrix(black['classification'], black['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_black.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_black.flatten()/sum(cnf_mat_black)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+pyplot.figure()
+sb.heatmap(cnf_mat_black, annot=labels, fmt='', cmap='Blues')
+
 
 print(other)
 X = other.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
 y = other[["classification"]].values.ravel()
 pred = model.predict(X)
-print(" Other (Race) Test Accuracy %.3f" % accuracy_score(y, pred))
+print(" Other (Race) Test Accuracy %.4f" % accuracy_score(y, pred))
 print(classification_report(other['classification'], other['prediction']))
-print(confusion_matrix(other['classification'], other['prediction']))
+cnf_mat_other = confusion_matrix(other['classification'], other['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_other.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_other.flatten()/sum(cnf_mat_other)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+pyplot.figure()
+sb.heatmap(cnf_mat_other, annot=labels, fmt='', cmap='Blues')
 
 print(white)
 X = white.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
 y = white[["classification"]].values.ravel()
 pred = model.predict(X)
-print(" White Test Accuracy %.3f" % accuracy_score(y, pred))
+print(" White Test Accuracy %.4f" % accuracy_score(y, pred))
 print(classification_report(white['classification'], white['prediction']))
-print(confusion_matrix(white['classification'], white['prediction']))
+cnf_mat_white = confusion_matrix(white['classification'], white['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_white.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_white.flatten()/sum(cnf_mat_white)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+pyplot.figure()
+sb.heatmap(cnf_mat_white, annot=labels, fmt='', cmap='Blues')
+pyplot.show()
+
+print("P Percent Disparity AIE: %.4f" % p_percent_score(cnf_mat_white, cnf_mat_aie))
+print("Equality of Opportunity Disparity AIE: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_aie))
+
+print("P Percent Disparity API: %.4f" % p_percent_score(cnf_mat_white, cnf_mat_api))
+print("Equality of Opportunity Disparity API: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_api))
+
+print("P Percent Disparity Other: %.4f" % p_percent_score(cnf_mat_white, cnf_mat_other))
+print("Equality of Opportunity Disparity Other: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_other))
+
+print("P Percent Disparity Black: %.4f" % p_percent_score(cnf_mat_white, cnf_mat_black))
+print("Equality of Opportunity Disparity Black: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_black))
+
+
