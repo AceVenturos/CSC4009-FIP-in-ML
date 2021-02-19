@@ -83,32 +83,34 @@ print(test_df.info())
 
 # Summarise class distributions across train and test data -> added full dataset
 test_df['classification'] = test_df['classification'].map(lambda x: x.rstrip('.'))
-# target_train, target_test = train_df.values[:, -1], test_df.values[:, -1]
-# counter_train, counter_test = Counter(target_train), Counter(target_test)
-# for k, v in counter_train.items():
-#     per = v / len(target_train) * 100
-#     print('Train Data: Class=%s, Count=%d, Percentage=%.3f%%' % (k, v, per))
-#
-# for k, v in counter_test.items():
-#     per = v / len(target_test) * 100
-#     print('Test Data: Class=%s, Count=%d, Percentage=%.3f%%' % (k, v, per))
+target_train, target_test = train_df.values[:, -1], test_df.values[:, -1]
+counter_train, counter_test = Counter(target_train), Counter(target_test)
+for k, v in counter_train.items():
+    per = v / len(target_train) * 100
+    print('Train Data: Class=%s, Count=%d, Percentage=%.3f%%' % (k, v, per))
+
+for k, v in counter_test.items():
+    per = v / len(target_test) * 100
+    print('Test Data: Class=%s, Count=%d, Percentage=%.3f%%' % (k, v, per))
 
 
 # Weird error were test.data has full stops at end of their lines?
 # https://stackoverflow.com/questions/13682044/remove-unwanted-parts-from-strings-in-a-column
 full_train_df_wo_pa['classification'] = full_train_df_wo_pa['classification'].map(lambda x: x.rstrip('.'))
-# target_full = full_train_df_wo_pa.values[:, -1]
-# counter_full = Counter(target_full)
-# for k, v in counter_full.items():
-#     per = v / len(target_full) * 100
-#     print('Full Data: Class=%s, Count=%d, Percentage=%.3f%%' % (k, v, per))
+target_full = full_train_df_wo_pa.values[:, -1]
+counter_full = Counter(target_full)
+for k, v in counter_full.items():
+    per = v / len(target_full) * 100
+    print('Full Data: Class=%s, Count=%d, Percentage=%.3f%%' % (k, v, per))
 
-# Portions of data that is male/female
-# target_full = full_train_df_wo_pa.values[:, 9]
-# counter_full = Counter(target_full)
-# for k, v in counter_full.items():
-#     per = v / len(target_full) * 100
-#     print('Sex: Class=%s, Count=%d, Percentage=%.3f%%' % (k, v, per))
+#Portions of data that is male/female
+target_full = full_train_df_wo_pa.values[:, 9]
+counter_full = Counter(target_full)
+for k, v in counter_full.items():
+    per = v / len(target_full) * 100
+    print('Sex: Class=%s, Count=%d, Percentage=%.3f%%' % (k, v, per))
+
+exit(0)
 #
 # # Portions of males> 50K
 # target_full = full_train_df_wo_pa.loc[full_train_df_wo_pa['sex'] == ' Male'].values[:, -1]
@@ -354,70 +356,85 @@ y = train_df_wo_pa[["classification"]].values.ravel()
 # model.fit(X, y)
 #
 # https://machinelearningmastery.com/save-load-machine-learning-models-python-scikit-learn/
-# model_filename = 'gdm.csv'
+model_filename = 'gdm.csv'
 # # pickle.dump(model, open(model_filename, 'wb'))
 # #
 #
-# X = test_df_wo_pa.drop("classification", axis=1)
-# y = test_df_wo_pa[["classification"]].values.ravel()
-#
-# model = pickle.load(open(model_filename, 'rb'))
+X = test_df_wo_pa.drop("classification", axis=1)
+y = test_df_wo_pa[["classification"]].values.ravel()
+
+model = pickle.load(open(model_filename, 'rb'))
 #
 # ###########
 # # Testing #
 # ###########
-# pred = model.predict(X)
-# print("Overall Test Accuracy %.3f" % accuracy_score(y, pred))
-# test_df_wo_pa['prediction'] = pred
-#
+pred = model.predict(X)
+print("Overall Test Accuracy %.3f" % accuracy_score(y, pred))
+test_df_wo_pa['prediction'] = pred
+
+trial13_w = [8664, 938, 1796, 1572]
+trial13_o = [1620, 138, 188, 144]
+
+group_percentages = ["{0:.2%}".format(value) for value in
+                     trial13_w/sum(trial13_w)]
+
+print(group_percentages)
+
+group_percentages = ["{0:.2%}".format(value) for value in
+                     trial13_o/sum(trial13_o)]
+
+print(group_percentages)
+
+
 #
 # #######
 # # Sex #
 # #######
-# test_df_wo_pa['sex'] = test_df['sex']
-# grouped_by_sex = test_df_wo_pa.groupby("sex")
-# males = grouped_by_sex.get_group(" Male")
-# females = grouped_by_sex.get_group(" Female")
-#
-# # print(males)
-# X = males.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
-# y = males[["classification"]].values.ravel()
-# pred = model.predict(X)
-# print(" Male Test Accuracy %.4f" % accuracy_score(y, pred))
-# # print(classification_report(males['classification'], males['prediction']))
-#
-# # # https://www.kite.com/python/answers/how-to-display-a-seaborn-plot-in-python
-# cnf_mat_male = confusion_matrix(males['classification'], males['prediction'])
-# group_names = ['True Neg','False Pos','False Neg','True Pos']
-# group_counts = ["{0:0.0f}".format(value) for value in
-#                 cnf_mat_male.flatten()]
-# group_percentages = ["{0:.2%}".format(value) for value in
-#                      cnf_mat_male.flatten()/sum(cnf_mat_male)]
-# labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
-#           zip(group_names,group_counts,group_percentages)]
-# labels = asarray(labels).reshape(2,2)
-# pyplot.figure()
-# sb.heatmap(cnf_mat_male, annot=labels, fmt='', cmap='Blues')
-#
-#
-# # print(females)
-# X = females.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
-# y = females[["classification"]].values.ravel()
-# pred = model.predict(X)
-# print(" Female Test Accuracy %.4f" % accuracy_score(y, pred))
-# # print(classification_report(females['classification'], females['prediction']))
-# cnf_mat_female = confusion_matrix(females['classification'], females['prediction'])
-# group_names = ['True Neg','False Pos','False Neg','True Pos']
-# group_counts = ["{0:0.0f}".format(value) for value in
-#                 cnf_mat_female.flatten()]
-# group_percentages = ["{0:.2%}".format(value) for value in
-#                      cnf_mat_female.flatten()/sum(cnf_mat_female)]
-# labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
-#           zip(group_names,group_counts,group_percentages)]
-# labels = asarray(labels).reshape(2,2)
-# print(cnf_mat_female)
-# pyplot.figure()
-# sb.heatmap(cnf_mat_female, annot=labels, fmt='', cmap='Blues')
+test_df_wo_pa['sex'] = test_df['sex']
+grouped_by_sex = test_df_wo_pa.groupby("sex")
+males = grouped_by_sex.get_group(" Male")
+females = grouped_by_sex.get_group(" Female")
+
+# print(males)
+X = males.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
+y = males[["classification"]].values.ravel()
+pred = model.predict(X)
+print(" Male Test Accuracy %.4f" % accuracy_score(y, pred))
+# print(classification_report(males['classification'], males['prediction']))
+
+# # https://www.kite.com/python/answers/how-to-display-a-seaborn-plot-in-python
+cnf_mat_male = confusion_matrix(males['classification'], males['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_male.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_male.flatten()/sum(cnf_mat_male)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+pyplot.figure()
+sb.heatmap(cnf_mat_male, annot=labels, fmt='', cmap='Blues')
+
+
+# print(females)
+X = females.drop("classification", axis=1).drop("sex", axis=1).drop("prediction", axis=1)
+y = females[["classification"]].values.ravel()
+pred = model.predict(X)
+print(" Female Test Accuracy %.4f" % accuracy_score(y, pred))
+# print(classification_report(females['classification'], females['prediction']))
+cnf_mat_female = confusion_matrix(females['classification'], females['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_female.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_female.flatten()/sum(cnf_mat_female)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+print(cnf_mat_female)
+pyplot.figure()
+sb.heatmap(cnf_mat_female, annot=labels, fmt='', cmap='Blues')
+
 
 
 # Demographic parity/Equality of oppotunity - https://scikit-lego.readthedocs.io/en/latest/fairness.html couldn't get
@@ -470,15 +487,14 @@ def average_odds_difference(cnf_mat_a, cnf_mat_b):
 
 
 
-# print("Disparate Impact: %.4f" % disparate_impact(cnf_mat_male, cnf_mat_female))
-# print("Equality of Opportunity Disparity: %.4f" % equality_of_opportunity(cnf_mat_male, cnf_mat_female))
-# print("Average Odds Difference: %.4f" % average_odds_difference(cnf_mat_male, cnf_mat_female))
-
+print("Disparate Impact: %.4f" % disparate_impact(cnf_mat_male, cnf_mat_female))
+print("Equality of Opportunity Disparity: %.4f" % equality_of_opportunity(cnf_mat_male, cnf_mat_female))
+print("Average Odds Difference: %.4f" % average_odds_difference(cnf_mat_male, cnf_mat_female))
+exit(0)
 ########
 # Race #
 ########
-# test_df_wo_pa['race'] = test_df['race']
-# test_df_wo_pa = test_df_wo_pa.drop("sex", axis=1)
+test_df_wo_pa['race'] = test_df['race']
 # grouped_by_race = test_df_wo_pa.groupby("race")
 # amer_indian_eskimo = grouped_by_race.get_group(" Amer-Indian-Eskimo")
 # asian_pac_islander = grouped_by_race.get_group(" Asian-Pac-Islander")
@@ -486,6 +502,11 @@ def average_odds_difference(cnf_mat_a, cnf_mat_b):
 # other = grouped_by_race.get_group(" Other")
 # white = grouped_by_race.get_group(" White")
 
+
+test_df_wo_pa.loc[test_df_wo_pa['race'] != ' White', 'race'] = " Other"
+grouped_by_race = test_df_wo_pa.groupby("race")
+other = grouped_by_race.get_group(" Other")
+white = grouped_by_race.get_group(" White")
 
 # # print(amer_indian_eskimo)
 # X = amer_indian_eskimo.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
@@ -544,41 +565,42 @@ def average_odds_difference(cnf_mat_a, cnf_mat_b):
 # sb.heatmap(cnf_mat_black, annot=labels, fmt='', cmap='Blues')
 #
 #
-# # print(other)
-# X = other.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
-# y = other[["classification"]].values.ravel()
-# pred = model.predict(X)
-# print(" Other (Race) Test Accuracy %.4f" % accuracy_score(y, pred))
-# # print(classification_report(other['classification'], other['prediction']))
-# cnf_mat_other = confusion_matrix(other['classification'], other['prediction'])
-# group_names = ['True Neg','False Pos','False Neg','True Pos']
-# group_counts = ["{0:0.0f}".format(value) for value in
-#                 cnf_mat_other.flatten()]
-# group_percentages = ["{0:.2%}".format(value) for value in
-#                      cnf_mat_other.flatten()/sum(cnf_mat_other)]
-# labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
-#           zip(group_names,group_counts,group_percentages)]
-# labels = asarray(labels).reshape(2,2)
-# pyplot.figure()
-# sb.heatmap(cnf_mat_other, annot=labels, fmt='', cmap='Blues')
+# print(other)
+X = other.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
+y = other[["classification"]].values.ravel()
+pred = model.predict(X)
+print(" Other (Race) Test Accuracy %.4f" % accuracy_score(y, pred))
+# print(classification_report(other['classification'], other['prediction']))
+cnf_mat_other = confusion_matrix(other['classification'], other['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_other.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_other.flatten()/sum(cnf_mat_other)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+pyplot.figure()
+sb.heatmap(cnf_mat_other, annot=labels, fmt='', cmap='Blues')
 #
-# # print(white)
-# X = white.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
-# y = white[["classification"]].values.ravel()
-# pred = model.predict(X)
-# print(" White Test Accuracy %.4f" % accuracy_score(y, pred))
-# # print(classification_report(white['classification'], white['prediction']))
-# cnf_mat_white = confusion_matrix(white['classification'], white['prediction'])
-# group_names = ['True Neg','False Pos','False Neg','True Pos']
-# group_counts = ["{0:0.0f}".format(value) for value in
-#                 cnf_mat_white.flatten()]
-# group_percentages = ["{0:.2%}".format(value) for value in
-#                      cnf_mat_white.flatten()/sum(cnf_mat_white)]
-# labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
-#           zip(group_names,group_counts,group_percentages)]
-# labels = asarray(labels).reshape(2,2)
-# pyplot.figure()
-# sb.heatmap(cnf_mat_white, annot=labels, fmt='', cmap='Blues')
+# print(white)
+X = white.drop("classification", axis=1).drop("race", axis=1).drop("prediction", axis=1)
+y = white[["classification"]].values.ravel()
+pred = model.predict(X)
+print(" White Test Accuracy %.4f" % accuracy_score(y, pred))
+# print(classification_report(white['classification'], white['prediction']))
+cnf_mat_white = confusion_matrix(white['classification'], white['prediction'])
+group_names = ['True Neg','False Pos','False Neg','True Pos']
+group_counts = ["{0:0.0f}".format(value) for value in
+                cnf_mat_white.flatten()]
+group_percentages = ["{0:.2%}".format(value) for value in
+                     cnf_mat_white.flatten()/sum(cnf_mat_white)]
+labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in
+          zip(group_names,group_counts,group_percentages)]
+labels = asarray(labels).reshape(2,2)
+pyplot.figure()
+sb.heatmap(cnf_mat_white, annot=labels, fmt='', cmap='Blues')
+
 # # pyplot.show()
 #
 # print("Disparity AIE: %.4f" % disparate_impact(cnf_mat_white, cnf_mat_aie))
@@ -589,14 +611,14 @@ def average_odds_difference(cnf_mat_a, cnf_mat_b):
 # print("Equality of Opportunity Disparity API: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_api))
 # print("Average Odds Difference: %.4f" % average_odds_difference(cnf_mat_white, cnf_mat_api))
 #
-# print("Disparity Other: %.4f" % disparate_impact(cnf_mat_white, cnf_mat_other))
-# print("Equality of Opportunity Disparity Other: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_other))
-# print("Average Odds Difference: %.4f" % average_odds_difference(cnf_mat_white, cnf_mat_other))
+print("Disparity Other: %.4f" % disparate_impact(cnf_mat_white, cnf_mat_other))
+print("Equality of Opportunity Disparity Other: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_other))
+print("Average Odds Difference: %.4f" % average_odds_difference(cnf_mat_white, cnf_mat_other))
 #
 # print("Disparity Black: %.4f" % disparate_impact(cnf_mat_white, cnf_mat_black))
 # print("Equality of Opportunity Disparity Black: %.4f" % equality_of_opportunity(cnf_mat_white, cnf_mat_black))
 # print("Average Odds Difference: %.4f" % average_odds_difference(cnf_mat_white, cnf_mat_black))
-
+exit(0)
 import joblib
 from optuna import Trial, visualization, study
 from optuna.samplers import TPESampler
@@ -606,9 +628,9 @@ def objective_race(trial: Trial, X, y, X_test, y_test) -> float:
     joblib.dump(study1, 'study1.pkl')
 
     param = {
-        'n_estimators': trial.suggest_int('n_estimators', 50, 75),
+        'n_estimators': trial.suggest_int('n_estimators', 50, 750),
         'max_depth': trial.suggest_int('max_depth', 3, 9),
-        'learning_rate': trial.suggest_loguniform('learning_rate', 0.001, 1.0),
+        'learning_rate': trial.suggest_loguniform('learning_rate', 0.005, 1.0),
         'subsample': trial.suggest_discrete_uniform('subsample',0.3, 1, 0.1)
     }
     le_model = GradientBoostingClassifier(**param)
@@ -643,9 +665,9 @@ def objective_sex(trial: Trial, X, y, X_test, y_test) -> float:
     joblib.dump(study2, 'study2.pkl')
 
     param = {
-        'n_estimators': trial.suggest_int('n_estimators', 50, 75),
+        'n_estimators': trial.suggest_int('n_estimators', 50, 750),
         'max_depth': trial.suggest_int('max_depth', 3, 9),
-        'learning_rate': trial.suggest_loguniform('learning_rate', 0.001, 1.0),
+        'learning_rate': trial.suggest_loguniform('learning_rate', 0.005, 1.0),
         'subsample': trial.suggest_discrete_uniform('subsample',0.3, 1, 0.1)
     }
     le_model = GradientBoostingClassifier(**param)
@@ -678,21 +700,26 @@ y = train_df_wo_pa[["classification"]].values.ravel()
 X_test = test_df_wo_pa.drop("classification", axis=1)
 y_test = test_df_wo_pa[["classification"]].values.ravel()
 
-# study1 = optuna.create_study(direction='maximize', sampler=TPESampler())
-# study1.optimize(lambda trial: objective_race(trial, X, y, X_test, y_test), n_trials=5)
+study1 = optuna.create_study(direction='maximize', sampler=TPESampler())
+study1.optimize(lambda trial: objective_race(trial, X, y, X_test, y_test), n_trials=50)
+
+print('Best trial: score {},\nparams {}'.format(study1.best_trial.value, study1.best_trial.params))
+import plotly.graph_objects as go
+fig1 = visualization.plot_parallel_coordinate(study1)
+fig1.write_image("fig1.2.jpeg")
+
+# X = train_df_wo_pa.drop("classification", axis=1)
+# y = train_df_wo_pa[["classification"]].values.ravel()
 #
-# print('Best trial: score {},\nparams {}'.format(study1.best_trial.value, study1.best_trial.params))
+# X_test = test_df_wo_pa.drop("classification", axis=1)
+# y_test = test_df_wo_pa[["classification"]].values.ravel()
 #
-# fig1 = visualization.plot_parallel_coordinate(study1)
-
-
-study2 = optuna.create_study(direction='maximize', sampler=TPESampler())
-study2.optimize(lambda trial: objective_sex(trial, X, y, X_test, y_test), n_trials=5)
-
-print('Best trial: score {},\nparams {}'.format(study2.best_trial.value, study2.best_trial.params))
-
-import plotly
-visualization.plot_parallel_coordinate(study2).show()
-# fig1.show()
+# study2 = optuna.create_study(direction='maximize', sampler=TPESampler())
+# study2.optimize(lambda trial: objective_sex(trial, X, y, X_test, y_test), n_trials=50)
+#
+# print('Best trial: score {},\nparams {}'.format(study2.best_trial.value, study2.best_trial.params))
+#
+# fig2 = visualization.plot_parallel_coordinate(study2)
+# fig2.write_image("fig2.2.jpeg")
 
 print("Here")
